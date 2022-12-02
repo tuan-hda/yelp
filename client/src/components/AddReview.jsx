@@ -1,6 +1,6 @@
 import React from "react";
 import { useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import base from "../api/base";
 
 const AddReview = () => {
