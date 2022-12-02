@@ -3,6 +3,7 @@ import { useContext } from "react";
 import base from "../api/base";
 import { Link, useNavigate } from "react-router-dom";
 import RestaurantContext from "../context/RestaurantContext";
+import Rating from "./Rating";
 
 const RestaurantList = () => {
   const { restaurants, setRestaurants } = useContext(RestaurantContext);
@@ -53,7 +54,16 @@ const RestaurantList = () => {
                 <td>{restaurant.name}</td>
                 <td>{restaurant.location}</td>
                 <td>{"$".repeat(restaurant.price_range)}</td>
-                <td>Rating</td>
+                <td>
+                  {restaurant.count ? (
+                    <>
+                      <Rating rating={restaurant.avg} />
+                      &nbsp;({restaurant.count})
+                    </>
+                  ) : (
+                    "0 reviews"
+                  )}
+                </td>
 
                 <td>
                   <Link

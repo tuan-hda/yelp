@@ -12,7 +12,7 @@ app.use(express.json());
 // Get all restaurants
 app.get("/api/v1/restaurants", async (req, res) => {
   try {
-    const results = await db.query("select * from restaurants");
+    const results = await db.query("SELECT * FROM restaurants left join (select restaurant_id, avg(rating) avg, count(*) from reviews group by restaurant_id) reviews on id = restaurant_id");
 
     res.status(200).json({
       status: "success",
@@ -31,17 +31,25 @@ app.get("/api/v1/restaurants/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const results = await db.query("select * from restaurants where id = $1", [id]);
+    const results = await db.query("SELECT * FROM restaurants left join (select restaurant_id, avg(rating) avg, count(*) from reviews group by restaurant_id) reviews on id = restaurant_id where id = $1", [id]);
+
+    const reviews = await db.query("select * from reviews where restaurant_id = $1", [id])
+
     res.status(200).json({
       status: "success",
       results: results.rowCount,
       data: {
         restaurants: results.rows[0],
+        reviews: reviews.rows
       },
     });
-  } catch (err) { }
+  } catch (err) {
+    res.status(400).json({ error: err });
+    console.log(err)
+  }
 });
 
+// Create new post
 app.post("/api/v1/restaurants", async (req, res) => {
   console.log(req.body);
   const { name, location, price_range } = req.body;
@@ -83,7 +91,7 @@ app.put("/api/v1/restaurants/:id", async (req, res) => {
     });
   } catch (err) {
     res.status(400).json({
-      error: String(err)
+      error: err
     })
   }
 });
@@ -100,9 +108,33 @@ app.delete("/api/v1/restaurants/:id", async (req, res) => {
       },
     });
   } catch (err) {
+    res.status(400).json({
+      error: err
+    })
     console.log(err);
   }
 });
+
+// Add review
+app.post('/api/v1/restaurants/:id/add-review', async (req, res) => {
+  try {
+    const { name, review, rating } = req.body
+    const results = await db.query("INSERT INTO reviews (restaurant_id, name, review, rating) VALUES ($1, $2, $3, $4) returning *", [req.params.id, name, review, rating])
+
+    res.status(201).json({
+      status: "success",
+      data: {
+        review: results.rows[0]
+      }
+    })
+
+  } catch (e) {
+    res.status(400).json({
+      error: error,
+    })
+    console.log(e)
+  }
+})
 
 const port = process.env.PORT || 3001;
 

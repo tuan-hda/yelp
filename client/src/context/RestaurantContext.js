@@ -4,12 +4,11 @@ const RestaurantContext = createContext()
 
 export const RestaurantContextProvider = props => {
   const [restaurants, setRestaurants] = useState([])
-  const [selectedRestaurant, setSelectedRestaurant] = useState('')
 
   const addRestaurant = restaurant => setRestaurants(prev => [...prev, restaurant])
 
   return <RestaurantContext.Provider value={
-    { restaurants, setRestaurants, addRestaurant, setSelectedRestaurant, selectedRestaurant }
+    { restaurants, setRestaurants, addRestaurant }
   }>
     {props.children}
   </RestaurantContext.Provider>
