@@ -5,7 +5,7 @@ import RestaurantList from "../components/RestaurantList";
 
 const Home = () => {
   return (
-    <div>
+    <div className='container'>
       <Header />
       <AddRestaurant />
       <RestaurantList />

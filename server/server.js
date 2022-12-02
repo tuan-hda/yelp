@@ -2,9 +2,11 @@ require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
 const db = require("./db");
+const cors = require("cors")
 
 const app = express();
 
+app.use(cors())
 app.use(express.json());
 
 // Get all restaurants
@@ -16,7 +18,7 @@ app.get("/api/v1/restaurants", async (req, res) => {
       status: "success",
       results: results.rows.length,
       data: {
-        restaurant: results.rows,
+        restaurants: results.rows,
       },
     });
   } catch (err) {
@@ -29,20 +31,22 @@ app.get("/api/v1/restaurants/:id", async (req, res) => {
   const id = req.params.id;
 
   try {
-    const results = await db.query("select $2 from restaurants where id = $1", [id, "name"]);
+    const results = await db.query("select * from restaurants where id = $1", [id]);
     res.status(200).json({
       status: "success",
       results: results.rowCount,
       data: {
-        restaurant: results.rows[0],
+        restaurants: results.rows[0],
       },
     });
-  } catch (err) {}
+  } catch (err) { }
 });
 
 app.post("/api/v1/restaurants", async (req, res) => {
   console.log(req.body);
   const { name, location, price_range } = req.body;
+
+  console.log(name, location, price_range)
 
   try {
     const results = await db.query(
@@ -50,13 +54,14 @@ app.post("/api/v1/restaurants", async (req, res) => {
       [name, location, price_range]
     );
 
-    console.log(results);
-
     res.status(201).json({
       status: "success",
       data: results.rows[0],
     });
   } catch (err) {
+    res.status(400).json({
+      error: 'Lmao'
+    })
     console.log(err);
   }
 });
@@ -77,7 +82,9 @@ app.put("/api/v1/restaurants/:id", async (req, res) => {
       data: results.rows[0],
     });
   } catch (err) {
-    console.log(err);
+    res.status(400).json({
+      error: String(err)
+    })
   }
 });
 
